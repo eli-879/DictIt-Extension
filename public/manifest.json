@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "DictIt",
+  "version": "1.0",
+  "permissions": ["sidePanel", "contextMenus", "storage"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {},
+  "side_panel": {
+    "default_path": "index.html"
+  }
+}

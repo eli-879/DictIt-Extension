@@ -1,0 +1,136 @@
+.app {
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  padding: 12px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Incoming word panel */
+.incoming-panel {
+  background: #f0f4ff;
+  border: 1px solid #c7d4f8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.incoming-panel__word {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.incoming-panel__definition {
+  margin: 0 0 12px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.incoming-panel__status {
+  margin: 0 0 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.incoming-panel__status--error {
+  color: #c0392b;
+}
+
+.incoming-panel__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Buttons */
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity 0.1s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.btn--primary {
+  background: #4a6cf7;
+  color: #fff;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: #555;
+  border: 1px solid #ccc;
+}
+
+/* Vocabulary list */
+.vocab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vocab-list__empty {
+  color: #999;
+  text-align: center;
+  margin-top: 32px;
+}
+
+/* Vocabulary entry */
+.vocab-entry {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  position: relative;
+}
+
+.vocab-entry__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.vocab-entry__word {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.vocab-entry__date {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.vocab-entry__definition {
+  margin: 0;
+  color: #444;
+  line-height: 1.5;
+  padding-right: 28px;
+}
+
+.vocab-entry__delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #bbb;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+
+  &:hover {
+    color: #e74c3c;
+    background: #fef2f2;
+  }
+}
