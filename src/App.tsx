@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.scss";
-import { useChromeMessage } from "./hooks/useChromeMessage";
 import { IncomingWordPanel } from "./components/IncomingWordPanel";
 import { VocabularyList } from "./components/VocabularyList";
-import { getWords, saveWord, deleteWord } from "./storage";
-import type { WordEntry } from "./constants/wordEntry";
 import type { ChromeMessageType } from "./constants/chromeMessageTypes";
+import type { WordEntry } from "./constants/wordEntry";
+import { useChromeMessage } from "./hooks/useChromeMessage";
+import { deleteWord, getWords, saveWord } from "./storage";
 
 function App() {
   const [pendingWord, setPendingWord] = useState<string | null>(null);
@@ -13,12 +13,22 @@ function App() {
 
   useEffect(() => {
     getWords().then(setWords);
+    // Read pending word written by background before the panel was opened.
+    chrome.storage.session.get("pendingWord").then((result) => {
+      const word = result["pendingWord"] as string | undefined;
+      if (word) {
+        setPendingWord(word);
+        chrome.storage.session.remove("pendingWord");
+      }
+    });
   }, []);
 
   const handleMessage = useCallback((message: ChromeMessageType) => {
     if (message.type === "NEW_WORD" && message.word) {
       setPendingWord(message.word);
     }
+    // Clear session entry so it doesn't replay on next mount.
+    chrome.storage.session.remove("pendingWord");
   }, []);
 
   useChromeMessage(handleMessage);

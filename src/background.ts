@@ -21,12 +21,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
 
   if (info.menuItemId === CONTEXT_MENU_ID) {
-    await chrome.sidePanel.open({ windowId: tab.windowId });
-
-    const message: ChromeMessageType = {
-      type: "NEW_WORD",
-      word: info.selectionText ?? "",
-    };
-    chrome.runtime.sendMessage(message);
+    const word = info.selectionText ?? "";
+    chrome.sidePanel.open({ windowId: tab.windowId });
+    await chrome.storage.session.set({ pendingWord: word });
+    const message: ChromeMessageType = { type: "NEW_WORD", word };
+    chrome.runtime.sendMessage(message).catch(() => {});
   }
 });

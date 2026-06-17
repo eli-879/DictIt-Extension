@@ -11,13 +11,23 @@ export function IncomingWordPanel({ word, onSave, onDismiss }: Props) {
 
   let definitionContent: React.ReactNode;
   if (loading) {
-    definitionContent = <p className="incoming-panel__status">Looking up definition…</p>;
+    definitionContent = (
+      <p className="incoming-panel__status">Looking up definition…</p>
+    );
   } else if (error) {
-    definitionContent = <p className="incoming-panel__status incoming-panel__status--error">Could not reach dictionary.</p>;
+    definitionContent = (
+      <p className="incoming-panel__status incoming-panel__status--error">
+        Could not reach dictionary.
+      </p>
+    );
   } else if (definition) {
-    definitionContent = <p className="incoming-panel__definition">{definition}</p>;
+    definitionContent = (
+      <p className="incoming-panel__definition">{definition}</p>
+    );
   } else {
-    definitionContent = <p className="incoming-panel__status">No definition found.</p>;
+    definitionContent = (
+      <p className="incoming-panel__status">No definition found.</p>
+    );
   }
 
   return (
