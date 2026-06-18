@@ -3,7 +3,7 @@ import "./App.scss";
 import { IncomingWordPanel } from "./components/IncomingWordPanel";
 import { VocabularyList } from "./components/VocabularyList";
 import type { ChromeMessageType } from "./constants/chromeMessageTypes";
-import type { WordEntry } from "./constants/wordEntry";
+import type { DictionaryContent, WordEntry } from "./constants/wordEntry";
 import { useChromeMessage } from "./hooks/useChromeMessage";
 import { deleteWord, getWords, saveWord } from "./storage";
 
@@ -17,7 +17,7 @@ function App() {
     chrome.storage.session.get("pendingWord").then((result) => {
       const word = result["pendingWord"] as string | undefined;
       if (word) {
-        setPendingWord(word);
+        setPendingWord(word.toLowerCase());
         chrome.storage.session.remove("pendingWord");
       }
     });
@@ -25,7 +25,7 @@ function App() {
 
   const handleMessage = useCallback((message: ChromeMessageType) => {
     if (message.type === "NEW_WORD" && message.word) {
-      setPendingWord(message.word);
+      setPendingWord(message.word.toLowerCase());
     }
     // Clear session entry so it doesn't replay on next mount.
     chrome.storage.session.remove("pendingWord");
@@ -33,12 +33,12 @@ function App() {
 
   useChromeMessage(handleMessage);
 
-  const handleSave = async (definition: string | null) => {
+  const handleSave = async (content: DictionaryContent | null) => {
     if (!pendingWord) return;
     const entry: WordEntry = {
       id: Date.now(),
       word: pendingWord,
-      definition: definition ?? "",
+      content: content ?? { definition: "" },
       sourceUrl: "",
       dateAdded: new Date().toISOString(),
     };

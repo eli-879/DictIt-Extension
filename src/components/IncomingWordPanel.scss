@@ -1,0 +1,39 @@
+.incoming-panel {
+  background: #f0f4ff;
+  border: 1px solid #c7d4f8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.incoming-panel__word {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.incoming-panel__definition {
+  margin: 0 0 12px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.incoming-panel__status {
+  margin: 0 0 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.incoming-panel__status--error {
+  color: #c0392b;
+}
+
+.incoming-panel__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.incoming-panel__example {
+  font-style: italic;
+}

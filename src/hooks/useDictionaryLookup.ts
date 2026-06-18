@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
+import type { DictionaryContent } from "../constants/wordEntry";
 
 interface DictionaryResult {
-  definition: string | null;
+  content: DictionaryContent | null;
   loading: boolean;
   error: boolean;
 }
 
 export function useDictionaryLookup(word: string | null): DictionaryResult {
   const [result, setResult] = useState<DictionaryResult>({
-    definition: null,
+    content: null,
     loading: false,
     error: false,
   });
@@ -17,22 +18,26 @@ export function useDictionaryLookup(word: string | null): DictionaryResult {
     if (!word) return;
 
     let cancelled = false;
-    setResult({ definition: null, loading: true, error: false });
+    setResult({ content: null, loading: true, error: false });
 
     fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`)
       .then(async (res) => {
         if (res.status === 404) {
-          if (!cancelled) setResult({ definition: null, loading: false, error: false });
+          if (!cancelled) setResult({ content: null, loading: false, error: false });
           return;
         }
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
-        const definition: string | null =
-          data?.[0]?.meanings?.[0]?.definitions?.[0]?.definition ?? null;
-        if (!cancelled) setResult({ definition, loading: false, error: false });
+        const content: DictionaryContent = {
+          definition: data?.[0]?.meanings?.[0]?.definitions?.[0]?.definition ?? "",
+          pronunciation: data?.[0]?.phonetics?.find((p: { text?: string }) => p.text)?.text,
+          wordType: data?.[0]?.meanings?.[0]?.partOfSpeech,
+          exampleUsage: data?.[0]?.meanings?.[0]?.definitions?.[0]?.example,
+        };
+        if (!cancelled) setResult({ content, loading: false, error: false });
       })
       .catch(() => {
-        if (!cancelled) setResult({ definition: null, loading: false, error: true });
+        if (!cancelled) setResult({ content: null, loading: false, error: true });
       });
 
     return () => {

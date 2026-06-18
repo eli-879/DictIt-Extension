@@ -1,4 +1,5 @@
 import type { WordEntry } from "../constants/wordEntry";
+import "./VocabularyEntry.scss";
 
 interface Props {
   entry: WordEntry;
@@ -12,16 +13,31 @@ export function VocabularyEntry({ entry, onDelete }: Props) {
     <div className="vocab-entry">
       <div className="vocab-entry__header">
         <span className="vocab-entry__word">{entry.word}</span>
-        <span className="vocab-entry__date">{date}</span>
+        <div>
+          <span className="vocab-entry__date">{date}</span>
+          <button
+            className="vocab-entry__delete"
+            aria-label={`Delete ${entry.word}`}
+            onClick={() => onDelete(entry.id)}
+          >
+            ✕
+          </button>
+        </div>
       </div>
-      <p className="vocab-entry__definition">{entry.definition || <em>No definition</em>}</p>
-      <button
-        className="vocab-entry__delete"
-        aria-label={`Delete ${entry.word}`}
-        onClick={() => onDelete(entry.id)}
-      >
-        ✕
-      </button>
+      {entry.content.pronunciation && (
+        <p className="vocab-entry__pronunciation">
+          {entry.content.pronunciation}
+        </p>
+      )}
+      {entry.content.wordType && (
+        <span className="vocab-entry__word-type">{entry.content.wordType}</span>
+      )}
+      <p className="vocab-entry__definition">
+        {entry.content.definition || <em>No definition</em>}
+      </p>
+      {entry.content.exampleUsage && (
+        <p className="vocab-entry__example">{entry.content.exampleUsage}</p>
+      )}
     </div>
   );
 }

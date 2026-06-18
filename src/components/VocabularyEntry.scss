@@ -1,0 +1,51 @@
+.vocab-entry {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  position: relative;
+}
+
+.vocab-entry__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.vocab-entry__word {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.vocab-entry__date {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.vocab-entry__definition {
+  margin: 0;
+  color: #444;
+  line-height: 1.5;
+  padding-right: 28px;
+}
+
+.vocab-entry__example {
+  font-style: italic;
+}
+
+.vocab-entry__delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #bbb;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+
+  &:hover {
+    color: #e74c3c;
+    background: #fef2f2;
+  }
+}

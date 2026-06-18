@@ -1,31 +1,47 @@
+import type { DictionaryContent } from "../constants/wordEntry";
 import { useDictionaryLookup } from "../hooks/useDictionaryLookup";
-
+import "./IncomingWordPanel.scss";
 interface Props {
   word: string;
-  onSave: (definition: string | null) => void;
+  onSave: (content: DictionaryContent | null) => void;
   onDismiss: () => void;
 }
 
 export function IncomingWordPanel({ word, onSave, onDismiss }: Props) {
-  const { definition, loading, error } = useDictionaryLookup(word);
+  const { content, loading, error } = useDictionaryLookup(word);
 
-  let definitionContent: React.ReactNode;
+  let bodyContent: React.ReactNode;
   if (loading) {
-    definitionContent = (
+    bodyContent = (
       <p className="incoming-panel__status">Looking up definition…</p>
     );
   } else if (error) {
-    definitionContent = (
+    bodyContent = (
       <p className="incoming-panel__status incoming-panel__status--error">
         Could not reach dictionary.
       </p>
     );
-  } else if (definition) {
-    definitionContent = (
-      <p className="incoming-panel__definition">{definition}</p>
+  } else if (content) {
+    bodyContent = (
+      <>
+        {content.pronunciation && (
+          <p className="incoming-panel__pronunciation">
+            {content.pronunciation}
+          </p>
+        )}
+        {content.wordType && (
+          <span className="incoming-panel__word-type">{content.wordType}</span>
+        )}
+        <p className="incoming-panel__definition">
+          {content.definition || <em>No definition</em>}
+        </p>
+        {content.exampleUsage && (
+          <p className="incoming-panel__example">{content.exampleUsage}</p>
+        )}
+      </>
     );
   } else {
-    definitionContent = (
+    bodyContent = (
       <p className="incoming-panel__status">No definition found.</p>
     );
   }
@@ -33,9 +49,9 @@ export function IncomingWordPanel({ word, onSave, onDismiss }: Props) {
   return (
     <div className="incoming-panel">
       <h2 className="incoming-panel__word">{word}</h2>
-      {definitionContent}
+      {bodyContent}
       <div className="incoming-panel__actions">
-        <button className="btn btn--primary" onClick={() => onSave(definition)}>
+        <button className="btn btn--primary" onClick={() => onSave(content)}>
           Save
         </button>
         <button className="btn btn--ghost" onClick={onDismiss}>
