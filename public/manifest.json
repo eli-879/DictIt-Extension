@@ -3,10 +3,17 @@
   "name": "DictIt",
   "version": "1.0",
   "permissions": ["sidePanel", "contextMenus", "storage"],
+  "host_permissions": ["https://www.google.com/search*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://www.google.com/search*"],
+      "js": ["content.js"]
+    }
+  ],
   "action": {},
   "side_panel": {
     "default_path": "index.html",
