@@ -5,11 +5,35 @@ import { VocabularyList } from "./components/VocabularyList";
 import type { ChromeMessageType } from "./constants/chromeMessageTypes";
 import type { DictionaryContent, WordEntry } from "./constants/wordEntry";
 import { useChromeMessage } from "./hooks/useChromeMessage";
-import { deleteWord, getWords, saveWord } from "./storage";
+import { deleteWord, getWords, normalizeWord, saveWord } from "./storage";
 
 function App() {
   const [pendingWord, setPendingWord] = useState<string | null>(null);
+  // Count + prior look-up date for the incoming word's badge; null when the
+  // incoming word is new (not yet saved), so no badge is shown.
+  const [searchCount, setSearchCount] = useState<number | null>(null);
+  const [priorDate, setPriorDate] = useState<string | null>(null);
   const [words, setWords] = useState<WordEntry[]>([]);
+
+  // Re-read storage so the count reflects the background increment, locate the
+  // saved entry (if any) matching the incoming word, and read the prior
+  // look-up date the background stashed. New (unsaved) words have no match.
+  const showIncomingWord = useCallback(async (raw: string) => {
+    const word = raw.toLowerCase();
+    setPendingWord(word);
+    const [current, session] = await Promise.all([
+      getWords(),
+      chrome.storage.session.get("priorDate"),
+    ]);
+    setWords(current);
+    const key = normalizeWord(word);
+    const match = current.find((w) => normalizeWord(w.word) === key);
+    setSearchCount(match ? match.searchCount ?? 1 : null);
+    setPriorDate(
+      match ? ((session["priorDate"] as string | undefined) ?? null) : null,
+    );
+    chrome.storage.session.remove(["pendingWord", "priorDate"]);
+  }, []);
 
   useEffect(() => {
     getWords().then(setWords);
@@ -17,21 +41,27 @@ function App() {
     chrome.storage.session.get("pendingWord").then((result) => {
       const word = result["pendingWord"] as string | undefined;
       if (word) {
-        setPendingWord(word.toLowerCase());
-        chrome.storage.session.remove("pendingWord");
+        showIncomingWord(word);
       }
     });
-  }, []);
+  }, [showIncomingWord]);
 
-  const handleMessage = useCallback((message: ChromeMessageType) => {
-    if (message.type === "NEW_WORD" && message.word) {
-      setPendingWord(message.word.toLowerCase());
-    }
-    // Clear session entry so it doesn't replay on next mount.
-    chrome.storage.session.remove("pendingWord");
-  }, []);
+  const handleMessage = useCallback(
+    (message: ChromeMessageType) => {
+      if (message.type === "NEW_WORD" && message.word) {
+        showIncomingWord(message.word);
+      }
+    },
+    [showIncomingWord],
+  );
 
   useChromeMessage(handleMessage);
+
+  const clearIncoming = () => {
+    setPendingWord(null);
+    setSearchCount(null);
+    setPriorDate(null);
+  };
 
   const handleSave = async (content: DictionaryContent | null) => {
     if (!pendingWord) return;
@@ -41,13 +71,16 @@ function App() {
       content: content ?? { definition: "" },
       sourceUrl: "",
       dateAdded: new Date().toISOString(),
+      searchCount: 1,
     };
     await saveWord(entry);
-    setWords((prev) => [entry, ...prev]);
-    setPendingWord(null);
+    // Re-read so an upsert (re-saving an existing word) doesn't duplicate the
+    // entry in the list.
+    setWords(await getWords());
+    clearIncoming();
   };
 
-  const handleDismiss = () => setPendingWord(null);
+  const handleDismiss = () => clearIncoming();
 
   const handleDelete = async (id: number) => {
     await deleteWord(id);
@@ -59,6 +92,8 @@ function App() {
       {pendingWord && (
         <IncomingWordPanel
           word={pendingWord}
+          searchCount={searchCount}
+          priorDate={priorDate}
           onSave={handleSave}
           onDismiss={handleDismiss}
         />

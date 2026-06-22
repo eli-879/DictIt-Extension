@@ -15,9 +15,18 @@ type Sort = { key: SortKey; dir: SortDir };
 // Option values map onto { key, dir } so the model stays two-dimensional while
 // the control is a single <select>.
 const SORT_OPTIONS: { value: string; label: string; sort: Sort }[] = [
-  { value: "date-desc", label: "Newest first", sort: { key: "date", dir: "desc" } },
-  { value: "date-asc", label: "Oldest first", sort: { key: "date", dir: "asc" } },
+  {
+    value: "date-desc",
+    label: "Newest first",
+    sort: { key: "date", dir: "desc" },
+  },
+  {
+    value: "date-asc",
+    label: "Oldest first",
+    sort: { key: "date", dir: "asc" },
+  },
   { value: "word-asc", label: "A–Z", sort: { key: "word", dir: "asc" } },
+  { value: "word-desc", label: "Z-A", sort: { key: "word", dir: "desc" } },
 ];
 
 // Keyed off SortKey: adding a key is a one-line change here.
@@ -45,7 +54,7 @@ export function VocabularyList({ words, onDelete }: Props) {
     ? words.filter(
         (entry) =>
           entry.word.toLowerCase().includes(normalized) ||
-          entry.content.definition.toLowerCase().includes(normalized),
+          entry.content.definition.toLowerCase().includes(normalized)
       )
     : words;
 
@@ -56,9 +65,8 @@ export function VocabularyList({ words, onDelete }: Props) {
   });
 
   const sortValue =
-    SORT_OPTIONS.find(
-      (o) => o.sort.key === sort.key && o.sort.dir === sort.dir,
-    )?.value ?? SORT_OPTIONS[0].value;
+    SORT_OPTIONS.find((o) => o.sort.key === sort.key && o.sort.dir === sort.dir)
+      ?.value ?? SORT_OPTIONS[0].value;
 
   return (
     <div className="vocab-list">

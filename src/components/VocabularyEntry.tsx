@@ -8,12 +8,15 @@ interface Props {
 
 export function VocabularyEntry({ entry, onDelete }: Props) {
   const date = new Date(entry.dateAdded).toLocaleDateString();
+  // Legacy entries saved before search tracking have no count → treat as 1.
+  const searchCount = entry.searchCount ?? 1;
 
   return (
     <div className="vocab-entry">
       <div className="vocab-entry__header">
         <span className="vocab-entry__word">{entry.word}</span>
         <div>
+          <span className="vocab-entry__count">{searchCount}×</span>
           <span className="vocab-entry__date">{date}</span>
           <button
             className="vocab-entry__delete"

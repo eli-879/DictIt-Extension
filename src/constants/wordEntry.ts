@@ -11,4 +11,6 @@ export interface WordEntry {
   content: DictionaryContent;
   sourceUrl: string;
   dateAdded: string;
+  searchCount: number;
+  lastSearched?: string;
 }
