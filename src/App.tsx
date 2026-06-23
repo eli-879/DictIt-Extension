@@ -14,13 +14,18 @@ function App() {
   const [searchCount, setSearchCount] = useState<number | null>(null);
   const [priorDate, setPriorDate] = useState<string | null>(null);
   const [words, setWords] = useState<WordEntry[]>([]);
+  const [query, setQuery] = useState("");
+  // True when the open panel was opened by a search look-up rather than a page
+  // capture, so saving can clear the search box to reveal the just-saved word.
+  const [pendingFromSearch, setPendingFromSearch] = useState(false);
 
   // Re-read storage so the count reflects the background increment, locate the
   // saved entry (if any) matching the incoming word, and read the prior
   // look-up date the background stashed. New (unsaved) words have no match.
-  const showIncomingWord = useCallback(async (raw: string) => {
+  const showIncomingWord = useCallback(async (raw: string, fromSearch = false) => {
     const word = raw.toLowerCase();
     setPendingWord(word);
+    setPendingFromSearch(fromSearch);
     const [current, session] = await Promise.all([
       getWords(),
       chrome.storage.session.get("priorDate"),
@@ -57,10 +62,22 @@ function App() {
 
   useChromeMessage(handleMessage);
 
+  // Look up a word typed into the vocabulary search box that matches no saved
+  // entry. By construction it is unsaved, so it flows through the new-word path
+  // (no badge, searchCount untouched); the fromSearch flag lets the save clear
+  // the search box afterward.
+  const handleLookup = useCallback(
+    (word: string) => {
+      showIncomingWord(word, true);
+    },
+    [showIncomingWord],
+  );
+
   const clearIncoming = () => {
     setPendingWord(null);
     setSearchCount(null);
     setPriorDate(null);
+    setPendingFromSearch(false);
   };
 
   const handleSave = async (content: DictionaryContent | null) => {
@@ -77,6 +94,9 @@ function App() {
     // Re-read so an upsert (re-saving an existing word) doesn't duplicate the
     // entry in the list.
     setWords(await getWords());
+    // A search look-up filters the list to a query that, by definition, had no
+    // match — clear it so the freshly saved word is visible.
+    if (pendingFromSearch) setQuery("");
     clearIncoming();
   };
 
@@ -98,7 +118,13 @@ function App() {
           onDismiss={handleDismiss}
         />
       )}
-      <VocabularyList words={words} onDelete={handleDelete} />
+      <VocabularyList
+        words={words}
+        query={query}
+        onQueryChange={setQuery}
+        onDelete={handleDelete}
+        onLookup={handleLookup}
+      />
     </div>
   );
 }

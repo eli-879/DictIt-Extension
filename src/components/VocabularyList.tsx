@@ -5,31 +5,26 @@ import "./VocabularyList.scss";
 
 interface Props {
   words: WordEntry[];
+  query: string;
+  onQueryChange: (query: string) => void;
   onDelete: (id: number) => void;
+  onLookup: (query: string) => void;
 }
 
-type SortKey = "date" | "word";
+type SortKey = "date" | "word" | "searches";
 type SortDir = "asc" | "desc";
 type Sort = { key: SortKey; dir: SortDir };
 
-// Option values map onto { key, dir } so the model stays two-dimensional while
-// the control is a single <select>.
-const SORT_OPTIONS: { value: string; label: string; sort: Sort }[] = [
-  {
-    value: "date-desc",
-    label: "Newest first",
-    sort: { key: "date", dir: "desc" },
-  },
-  {
-    value: "date-asc",
-    label: "Oldest first",
-    sort: { key: "date", dir: "asc" },
-  },
-  { value: "word-asc", label: "A–Z", sort: { key: "word", dir: "asc" } },
-  { value: "word-desc", label: "Z-A", sort: { key: "word", dir: "desc" } },
-];
+// Label shown for each key in the "Sort by" control. Insertion order is the
+// option order; Date is first so it lines up with the default sort.
+const SORT_KEY_LABELS: Record<SortKey, string> = {
+  date: "Date",
+  word: "Word",
+  searches: "Searches",
+};
 
-// Keyed off SortKey: adding a key is a one-line change here.
+// Keyed off SortKey: each comparator returns the ascending order; the direction
+// toggle flips it. Adding a key means adding one comparator and one label above.
 const comparators: Record<SortKey, (a: WordEntry, b: WordEntry) => number> = {
   word: (a, b) =>
     a.word.localeCompare(b.word, undefined, { sensitivity: "base" }),
@@ -39,10 +34,17 @@ const comparators: Record<SortKey, (a: WordEntry, b: WordEntry) => number> = {
     const tb = Date.parse(b.dateAdded) || -Infinity;
     return ta - tb;
   },
+  // A missing searchCount reads as 1, matching how entries display it.
+  searches: (a, b) => (a.searchCount ?? 1) - (b.searchCount ?? 1),
 };
 
-export function VocabularyList({ words, onDelete }: Props) {
-  const [query, setQuery] = useState("");
+export function VocabularyList({
+  words,
+  query,
+  onQueryChange,
+  onDelete,
+  onLookup,
+}: Props) {
   const [sort, setSort] = useState<Sort>({ key: "date", dir: "desc" });
 
   if (words.length === 0) {
@@ -64,38 +66,58 @@ export function VocabularyList({ words, onDelete }: Props) {
     return sort.dir === "asc" ? result : -result;
   });
 
-  const sortValue =
-    SORT_OPTIONS.find((o) => o.sort.key === sort.key && o.sort.dir === sort.dir)
-      ?.value ?? SORT_OPTIONS[0].value;
-
   return (
     <div className="vocab-list">
       <input
         className="vocab-list__search"
         type="search"
-        placeholder="Search words…"
+        placeholder="Search saved words or lookup new word…"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => onQueryChange(e.target.value)}
       />
-      <label className="vocab-list__sort">
-        Sort:
-        <select
-          className="vocab-list__sort-select"
-          value={sortValue}
-          onChange={(e) => {
-            const option = SORT_OPTIONS.find((o) => o.value === e.target.value);
-            if (option) setSort(option.sort);
-          }}
+      <div className="vocab-list__sort">
+        <label className="vocab-list__sort-label">
+          Sort by:
+          <select
+            className="vocab-list__sort-select"
+            value={sort.key}
+            onChange={(e) =>
+              setSort((s) => ({ ...s, key: e.target.value as SortKey }))
+            }
+          >
+            {(Object.keys(SORT_KEY_LABELS) as SortKey[]).map((key) => (
+              <option key={key} value={key}>
+                {SORT_KEY_LABELS[key]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          className="vocab-list__sort-dir"
+          onClick={() =>
+            setSort((s) => ({ ...s, dir: s.dir === "asc" ? "desc" : "asc" }))
+          }
+          aria-label={
+            sort.dir === "asc" ? "Sort ascending" : "Sort descending"
+          }
+          title={sort.dir === "asc" ? "Ascending" : "Descending"}
         >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+          {sort.dir === "asc" ? "↑" : "↓"}
+        </button>
+      </div>
       {sorted.length === 0 ? (
-        <p className="vocab-list__empty">No words match your search.</p>
+        <div className="vocab-list__no-match">
+          <p className="vocab-list__empty">No words match your search.</p>
+          {normalized && (
+            <button
+              className="btn btn--primary vocab-list__lookup"
+              onClick={() => onLookup(query.trim())}
+            >
+              Look up “{query.trim()}”
+            </button>
+          )}
+        </div>
       ) : (
         sorted.map((entry) => (
           <VocabularyEntry key={entry.id} entry={entry} onDelete={onDelete} />

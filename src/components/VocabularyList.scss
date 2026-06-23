@@ -28,6 +28,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.vocab-list__sort-label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: #555;
 }
@@ -50,8 +57,49 @@
   }
 }
 
+.vocab-list__sort-dir {
+  flex: none;
+  box-sizing: border-box;
+  width: 36px;
+  padding: 8px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #555;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #4a6cf7;
+    color: #4a6cf7;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4a6cf7;
+  }
+}
+
 .vocab-list__empty {
   color: #999;
   text-align: center;
   margin-top: 32px;
+}
+
+.vocab-list__no-match {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  .vocab-list__empty {
+    margin-top: 32px;
+    margin-bottom: 0;
+  }
+}
+
+.vocab-list__lookup {
+  max-width: 100%;
+  white-space: normal;
 }
